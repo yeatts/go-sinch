@@ -23,8 +23,8 @@ const (
 	CABaseURLv1 = "https://cn" + BaseURLv1
 )
 
-// New creates a new Client with an embedded http.Client
-func New() *Client {
+// NewClient creates a new Client with an embedded http.Client
+func NewClient() *Client {
 	return &Client{
 		baseURL: USBaseURLv1,
 		httpClient: &http.Client{
