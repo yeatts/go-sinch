@@ -14,7 +14,7 @@ func main() {
 		From("+12345678901").
 		WithBody("Hello World!")
 
-	if _, err := req.Execute(); err != nil {
+	if _, err := req.Send(); err != nil {
 		fmt.Println(err)
 	}
 }
