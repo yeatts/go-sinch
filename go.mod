@@ -1,4 +1,4 @@
-module go-sinch
+module github.com/theZMC/go-sinch
 
 go 1.18
 
