@@ -23,8 +23,22 @@ const (
 	CABaseURLv1 = "https://cn" + BaseURLv1
 )
 
-// NewClient creates a new Client with an embedded http.Client
-func NewClient() *Client {
+type Executable interface {
+	US() Executable
+	EU() Executable
+	AU() Executable
+	BR() Executable
+	CA() Executable
+	NewSendRequest() Sendable
+	WithAuthToken(authToken string) Executable
+	WithPlanID(planID string) Executable
+	WithCustomBaseURL(baseURL string) Executable
+	WithCustomHTTPClient(httpClient *http.Client) Executable
+	Execute(req *http.Request, resourceName string) (*http.Response, error)
+}
+
+// NewClient creates a new Client with an embedded http.Client that implements the Executable interface
+func NewClient() Executable {
 	return &Client{
 		baseURL: USBaseURLv1,
 		httpClient: &http.Client{
@@ -34,81 +48,88 @@ func NewClient() *Client {
 }
 
 // US is a shortcut for New().WithCustomBaseURL(USBaseURLv1)
-func (client *Client) US() *Client {
-	defer client.transaction()()
-	client.baseURL = USBaseURLv1
-	return client
+func (c *Client) US() Executable {
+	defer c.transaction()()
+	c.baseURL = USBaseURLv1
+	return c
 }
 
 // EU is a shortcut for New().WithCustomBaseURL(EUBaseURLv1)
-func (client *Client) EU() *Client {
-	defer client.transaction()()
-	client.baseURL = EUBaseURLv1
-	return client
+func (c *Client) EU() Executable {
+	defer c.transaction()()
+	c.baseURL = EUBaseURLv1
+	return c
 }
 
 // AU is a shortcut for New().WithCustomBaseURL(AUBaseURLv1)
-func (client *Client) AU() *Client {
-	defer client.transaction()()
-	client.baseURL = AUBaseURLv1
-	return client
+func (c *Client) AU() Executable {
+	defer c.transaction()()
+	c.baseURL = AUBaseURLv1
+	return c
 }
 
 // BR is a shortcut for New().WithCustomBaseURL(BRBaseURLv1)
-func (client *Client) BR() *Client {
-	defer client.transaction()()
-	client.baseURL = BRBaseURLv1
-	return client
+func (c *Client) BR() Executable {
+	defer c.transaction()()
+	c.baseURL = BRBaseURLv1
+	return c
 }
 
 // CA is a shortcut for New().WithCustomBaseURL(CABaseURLv1)
-func (client *Client) CA() *Client {
-	defer client.transaction()()
-	client.baseURL = CABaseURLv1
-	return client
+func (c *Client) CA() Executable {
+	defer c.transaction()()
+	c.baseURL = CABaseURLv1
+	return c
 }
 
 // WithAuthToken sets the auth token for the client
-func (client *Client) WithAuthToken(authToken string) *Client {
-	defer client.transaction()()
-	client.authToken = authToken
-	return client
+func (c *Client) WithAuthToken(authToken string) Executable {
+	defer c.transaction()()
+	c.authToken = authToken
+	return c
 }
 
 // WithPlanID sets the plan ID for the client
-func (client *Client) WithPlanID(planID string) *Client {
-	defer client.transaction()()
-	client.planID = planID
-	return client
+func (c *Client) WithPlanID(planID string) Executable {
+	defer c.transaction()()
+	c.planID = planID
+	return c
 }
 
 // WithCustomBaseURL sets the base URL for the client
-func (client *Client) WithCustomBaseURL(baseURL string) *Client {
-	defer client.transaction()()
-	client.baseURL = baseURL
-	return client
+func (c *Client) WithCustomBaseURL(baseURL string) Executable {
+	defer c.transaction()()
+	c.baseURL = baseURL
+	return c
 }
 
-func (client *Client) WithCustomHTTPClient(httpClient *http.Client) *Client {
-	defer client.transaction()()
-	client.httpClient = httpClient
-	return client
+// WithCustomHTTPClient allows you to set a custom http.Client for the SMS client to use for http requests
+func (c *Client) WithCustomHTTPClient(httpClient *http.Client) Executable {
+	defer c.transaction()()
+	c.httpClient = httpClient
+	return c
 }
 
 // transaction locks the client and returns a function that unlocks it. Common usage pattern is to defer a call to
 // the returned function.
 // Example:
 // 	defer client.transaction()()
-func (client *Client) transaction() func() {
-	client.mu.Lock()
-	return client.mu.Unlock
+func (c *Client) transaction() func() {
+	c.mu.Lock()
+	return c.mu.Unlock
 }
 
 // Execute executes the given request with the client's http.Client and returns the response object.
-func (client *Client) Execute(req *http.Request, resourceName string) (*http.Response, error) {
-	defer client.transaction()()
-	req.Header.Set("Authorization", "Bearer "+client.authToken)
+func (c *Client) Execute(req *http.Request, resourceName string) (*http.Response, error) {
+	defer c.transaction()()
+	if c.authToken == "" {
+		return nil, NoAuthTokenError
+	}
+	if c.planID == "" {
+		return nil, NoPlanIDError
+	}
+	req.Header.Set("Authorization", "Bearer "+c.authToken)
 	req.Header.Set("Content-Type", "application/json")
-	req.URL.Path = fmt.Sprintf("%s/%s", client.baseURL, resourceName)
-	return client.httpClient.Do(req)
+	req.URL.Path = fmt.Sprintf("%s/%s", c.baseURL, resourceName)
+	return c.httpClient.Do(req)
 }

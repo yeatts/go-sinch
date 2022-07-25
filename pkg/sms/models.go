@@ -17,10 +17,10 @@ const (
 	ISO8601          = "2006-01-02T15:04:05.000Z"
 )
 
-// SMSSendRequest represents the request body for sending SMS messages.
+// SendRequest represents the request body for sending SMS messages.
 //
 // Ref: https://developers.sinch.com/docs/sms/api-reference/sms/tag/Batches/#tag/Batches/operation/SendSMS
-type SMSSendRequest struct {
+type SendRequest struct {
 	Client                  *Client
 	Body                    string                       `json:"body"`                                  // The message content
 	DeliveryReport          DeliveryReport               `json:"delivery_report"`                       // Request delivery report callback. Note that delivery reports can be fetched from the API regardless of this setting.
@@ -40,6 +40,27 @@ type SMSSendRequest struct {
 	FromNumberPlanIndicator int                          `json:"from_npi,omitempty"`                    // Number Plan Indicator for the sender number. Use to override the automatic detection.
 }
 
+type Sendable interface {
+	WithBody(body string) Sendable
+	WithDeliveryReport(deliveryReport DeliveryReport) Sendable
+	To(to ...string) Sendable
+	From(from string) Sendable
+	WithParameters(parameters map[string]map[string]string) Sendable
+	WithParameter(parameterName string, valueMap map[string]string) Sendable
+	WithCampaignID(campaignID string) Sendable
+	SendingAt(sendAt string) Sendable
+	ExpiringAt(expireAt string) Sendable
+	WithCallbackURL(callbackURL string) Sendable
+	WithClientReference(clientReference string) Sendable
+	WithFeedbackEnabled() Sendable
+	WithFlashMessageEnabled() Sendable
+	WithTruncateConcatEnabled() Sendable
+	WithMaxNumberOfMessageParts(maxNumberOfMessageParts int) Sendable
+	WithTonOverride(fromTypeOfNumber int) Sendable
+	WithNPIOverride(fromNumberPlanIndicator int) Sendable
+	Send() (*SendResponse, error)
+}
+
 type DeliveryReport string
 
 const (
@@ -49,8 +70,8 @@ const (
 	PerRecipient DeliveryReport = "per_recipient"
 )
 
-type SMSSendResponse struct {
-	SMSSendRequest
+type SendResponse struct {
+	SendRequest
 	ID         string `json:"id"`          // Unique identifier for batch
 	Canceled   bool   `json:"canceled"`    // Indicates if the batch has been canceled or not
 	CreatedAt  string `json:"created_at"`  // Timestamp for when batch was created. Formatted as ISO-8601: YYYY-MM-DDThh:mm:ss.SSSZ
@@ -66,44 +87,44 @@ type SMSListBatchesRequest struct {
 	ClientReference string `url:"client_reference,omitempty"` // Client reference to include
 }
 
-// NewSendRequest returns a new SMSSendRequest using this SMS client.
-func (c *Client) NewSendRequest() *SMSSendRequest {
+// NewSender returns a new SMSSendRequest using this SMS client.
+func (c *Client) NewSendRequest() Sendable {
 	return NewSendRequest(c)
 }
 
-// NewSendRequest returns a new SMSSendRequest using the provided SMS client.
-func NewSendRequest(client *Client) *SMSSendRequest {
-	return &SMSSendRequest{
+// NewSender returns a new SMSSendRequest using the provided SMS client.
+func NewSendRequest(client *Client) Sendable {
+	return &SendRequest{
 		Client: client,
 	}
 }
 
 // WithBody sets the message body for the request.
-func (r *SMSSendRequest) WithBody(body string) *SMSSendRequest {
-	r.Body = body
-	return r
+func (smsSendRequest *SendRequest) WithBody(body string) Sendable {
+	smsSendRequest.Body = body
+	return smsSendRequest
 }
 
 // WithDeliveryReport sets the delivery report option for the request.
-func (r *SMSSendRequest) WithDeliveryReport(deliveryReport DeliveryReport) *SMSSendRequest {
+func (r *SendRequest) WithDeliveryReport(deliveryReport DeliveryReport) Sendable {
 	r.DeliveryReport = deliveryReport
 	return r
 }
 
 // To sets the recipient(s) for the request.
-func (r *SMSSendRequest) To(to ...string) *SMSSendRequest {
+func (r *SendRequest) To(to ...string) Sendable {
 	r.ToNumbers = append(r.ToNumbers, to...)
 	return r
 }
 
 // From sets the sending number for the request.
-func (r *SMSSendRequest) From(from string) *SMSSendRequest {
+func (r *SendRequest) From(from string) Sendable {
 	r.FromNumber = from
 	return r
 }
 
 // WithParameters sets the provided parameters for the request.
-func (r *SMSSendRequest) WithParameters(parameters map[string]map[string]string) *SMSSendRequest {
+func (r *SendRequest) WithParameters(parameters map[string]map[string]string) Sendable {
 	for k, v := range parameters {
 		r.Parameters[k] = v
 	}
@@ -111,76 +132,76 @@ func (r *SMSSendRequest) WithParameters(parameters map[string]map[string]string)
 }
 
 // WithParameter sets a single parameter for the request.
-func (r *SMSSendRequest) WithParameter(parameterName string, valueMap map[string]string) *SMSSendRequest {
+func (r *SendRequest) WithParameter(parameterName string, valueMap map[string]string) Sendable {
 	r.Parameters[parameterName] = valueMap
 	return r
 }
 
 // WithCampaignID sets the campaign ID for the request.
-func (r *SMSSendRequest) WithCampaignID(campaignID string) *SMSSendRequest {
+func (r *SendRequest) WithCampaignID(campaignID string) Sendable {
 	r.CampaignID = campaignID
 	return r
 }
 
 // SendingAt sets the date and time to deliver the batch.
-func (r *SMSSendRequest) SendingAt(sendAt string) *SMSSendRequest {
+func (r *SendRequest) SendingAt(sendAt string) Sendable {
 	r.SendAt = sendAt
 	return r
 }
 
 // ExpiringAt sets the date and time to stop attempting to deliver a batch if failures occur.
-func (r *SMSSendRequest) ExpiringAt(expireAt string) *SMSSendRequest {
+func (r *SendRequest) ExpiringAt(expireAt string) Sendable {
 	r.ExpireAt = expireAt
 	return r
 }
 
 // WithCallbackURL sets the callback URL for the request.
-func (r *SMSSendRequest) WithCallbackURL(callbackURL string) *SMSSendRequest {
+func (r *SendRequest) WithCallbackURL(callbackURL string) Sendable {
 	r.CallbackURL = callbackURL
 	return r
 }
 
 // WithClientReference sets the client reference for the request.
-func (r *SMSSendRequest) WithClientReference(clientReference string) *SMSSendRequest {
+func (r *SendRequest) WithClientReference(clientReference string) Sendable {
 	r.ClientReference = clientReference
 	return r
 }
 
 // WithFeedbackEnabled enables feedback for the request. By default this is false.
-func (r *SMSSendRequest) WithFeedbackEnabled() *SMSSendRequest {
+func (r *SendRequest) WithFeedbackEnabled() Sendable {
 	r.FeedbackEnabled = true
 	return r
 }
 
 // WithFlashMessageEnabled enables a flash message for the request. By default this is false.
-func (r *SMSSendRequest) WithFlashMessageEnabled() *SMSSendRequest {
+func (r *SendRequest) WithFlashMessageEnabled() Sendable {
 	r.FlashMessage = true
 	return r
 }
 
 // WithTruncateConcatEnabled enables truncating the concatenated message for the request. This means if the message is longer
 // than can be delivered by a single SMS, only the first SMS will be sent. By default this is false.
-func (r *SMSSendRequest) WithTruncateConcatEnabled() *SMSSendRequest {
+func (r *SendRequest) WithTruncateConcatEnabled() Sendable {
 	r.TruncateConcat = true
 	return r
 }
 
 // WithMaxNumberOfMessageParts sets the maximum number of message parts for the request.
-func (r *SMSSendRequest) WithMaxNumberOfMessageParts(maxNumberOfMessageParts int) *SMSSendRequest {
+func (r *SendRequest) WithMaxNumberOfMessageParts(maxNumberOfMessageParts int) Sendable {
 	r.MaxNumberOfMessageParts = maxNumberOfMessageParts
 	return r
 }
 
 // WithTonOverride overrides the type of number for the request. By default this is determined automatically. Only
 // use this option if you know what you're doing.
-func (r *SMSSendRequest) WithTonOverride(fromTypeOfNumber int) *SMSSendRequest {
+func (r *SendRequest) WithTonOverride(fromTypeOfNumber int) Sendable {
 	r.FromTypeOfNumber = fromTypeOfNumber
 	return r
 }
 
 // WithNPIOverride overrides the type of Number Plan Indicator for the request. By default this is determined
 // automatically. Only use this option if you know what you're doing.
-func (r *SMSSendRequest) WithNPIOverride(fromNumberPlanIndicator int) *SMSSendRequest {
+func (r *SendRequest) WithNPIOverride(fromNumberPlanIndicator int) Sendable {
 	r.FromNumberPlanIndicator = fromNumberPlanIndicator
 	return r
 }
@@ -189,7 +210,7 @@ func (r *SMSSendRequest) WithNPIOverride(fromNumberPlanIndicator int) *SMSSendRe
 // this should be called before sending the request to keep performance to a maximum and API errors to a minimum.
 //
 // Ref: https://developers.sinch.com/docs/sms/api-reference/sms/tag/Batches/#tag/Batches/operation/SendSMS
-func (r *SMSSendRequest) Validate() error {
+func (r *SendRequest) Validate() error {
 	if len(r.ToNumbers) == 0 || len(r.ToNumbers) > 0 && slices.Contains(r.ToNumbers, "") || len(r.ToNumbers) > 1000 {
 		return InvalidToNumberError
 	}
@@ -222,7 +243,7 @@ func (r *SMSSendRequest) Validate() error {
 }
 
 // toIOReader converts the SMSSendRequest to json and encodes it to an io.Reader.
-func (r *SMSSendRequest) toIOReader() (io.Reader, error) {
+func (r *SendRequest) toIOReader() (io.Reader, error) {
 	buffer := &bytes.Buffer{}
 	encoder := json.NewEncoder(buffer)
 	encoder.SetEscapeHTML(false)
@@ -233,7 +254,7 @@ func (r *SMSSendRequest) toIOReader() (io.Reader, error) {
 }
 
 // toRequest converts the SMSSendRequest to an http.Request.
-func (r *SMSSendRequest) toRequest() (*http.Request, error) {
+func (r *SendRequest) toRequest() (*http.Request, error) {
 	json, err := r.toIOReader()
 	if err != nil {
 		return nil, err
@@ -246,8 +267,8 @@ func (r *SMSSendRequest) toRequest() (*http.Request, error) {
 	return req, nil
 }
 
-// Execute sends the request to the Sinch API and returns the response.
-func (r *SMSSendRequest) Execute() (*SMSSendResponse, error) {
+// Send sends the request to the Sinch API and returns the response.
+func (r *SendRequest) Send() (*SendResponse, error) {
 	req, err := r.toRequest()
 
 	if err != nil {
@@ -264,7 +285,7 @@ func (r *SMSSendRequest) Execute() (*SMSSendResponse, error) {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	var response SMSSendResponse
+	var response SendResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, err
 	}
