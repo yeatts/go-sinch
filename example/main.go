@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"go-sinch/pkg/sms"
+
+	"github.com/thezmc/go-sinch/pkg/sms"
 )
 
 func main() {
