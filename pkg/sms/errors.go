@@ -7,6 +7,8 @@ func (e Error) Error() string {
 }
 
 const (
+	NoAuthTokenError            = Error("an auth token is required")
+	NoPlanIDError               = Error("a plan ID is required")
 	InvalidToNumberError        = Error("at least one to_number is required and no more than 1000 are allowed")
 	InvalidFromNumberError      = Error("a from_number is required")
 	InvalidTypeOfNumberError    = Error("type_of_number must be an int in the range 0-6")
