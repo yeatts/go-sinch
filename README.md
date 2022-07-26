@@ -13,21 +13,23 @@ Send a message using the SMS client
 package main
 
 import (
-	"fmt"
+	"log"
 
-	sinchsms "github.com/theZMC/go-sinch/pkg/sms"
+	sinchsms "github.com/thezmc/go-sinch/pkg/sms"
 )
 
 func main() {
-	sms := sinchsms.New().US().WithAuthToken("authToken").WithPlanID("planID")
+	client := sinchsms.NewClient().
+		WithAuthToken("authToken").
+		WithPlanID("planID")
 
-	req := sms.NewSendRequest().
+	req := client.NewBatchSender().
 		To("+12345678901").
 		From("+12345678901").
 		WithBody("Hello World!")
 
-	if _, err := req.Execute(); err != nil {
-		fmt.Println(err)
+	if err := req.Send().Error(); err != nil {
+		log.Fatalf("Error sending SMS message: %v", err)
 	}
 }
 ```
