@@ -1,20 +1,22 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
-	"github.com/thezmc/go-sinch/pkg/sms"
+	sinchsms "github.com/thezmc/go-sinch/pkg/sms"
 )
 
 func main() {
-	client := sms.NewClient().US().WithAuthToken("authToken").WithPlanID("planID")
+	client := sinchsms.NewClient().
+		WithAuthToken("authToken").
+		WithPlanID("planID")
 
-	req := client.NewSendRequest().
+	req := client.NewBatchSender().
 		To("+12345678901").
 		From("+12345678901").
 		WithBody("Hello World!")
 
-	if _, err := req.Send(); err != nil {
-		fmt.Println(err)
+	if err := req.Send().Error(); err != nil {
+		log.Fatalf("Error sending SMS message: %v", err)
 	}
 }

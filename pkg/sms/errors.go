@@ -1,4 +1,4 @@
-package sms
+package sms // import sinchsms "github.com/thezmc/go-sinch/sms"
 
 type Error string
 
