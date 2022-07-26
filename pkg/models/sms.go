@@ -1,4 +1,4 @@
-package sms // import sinchsms "github.com/thezmc/go-sinch/sms"
+package models // import sinchsms "github.com/thezmc/go-sinch/sms"
 
 // SendRequest represents the request body for sending SMS messages.
 //

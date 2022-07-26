@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+
+	"github.com/thezmc/go-sinch/pkg/interfaces"
 )
 
 type client struct {
@@ -24,73 +26,71 @@ const (
 )
 
 // NewClient creates a new Client with an embedded http.Client that implements the Executable interface
-func NewClient() SMSClient {
+func NewClient() interfaces.SMSClient {
 	return &client{
-		baseURL: USBaseURLv1,
-		httpClient: &http.Client{
-			Transport: &http.Transport{},
-		},
+		baseURL:    USBaseURLv1,
+		httpClient: new(http.Client),
 	}
 }
 
-// US is a shortcut for New().WithCustomBaseURL(USBaseURLv1)
-func (c *client) US() SMSClient {
+// US is a shortcut for New().WithBaseURL(USBaseURLv1). The base URL is set to the US base URL by default.
+func (c *client) US() interfaces.SMSClient {
 	defer c.transact()()
 	c.baseURL = USBaseURLv1
 	return c
 }
 
-// EU is a shortcut for New().WithCustomBaseURL(EUBaseURLv1)
-func (c *client) EU() SMSClient {
+// EU is a shortcut for New().WithBaseURL(EUBaseURLv1)
+func (c *client) EU() interfaces.SMSClient {
 	defer c.transact()()
 	c.baseURL = EUBaseURLv1
 	return c
 }
 
-// AU is a shortcut for New().WithCustomBaseURL(AUBaseURLv1)
-func (c *client) AU() SMSClient {
+// AU is a shortcut for New().WithBaseURL(AUBaseURLv1)
+func (c *client) AU() interfaces.SMSClient {
 	defer c.transact()()
 	c.baseURL = AUBaseURLv1
 	return c
 }
 
-// BR is a shortcut for New().WithCustomBaseURL(BRBaseURLv1)
-func (c *client) BR() SMSClient {
+// BR is a shortcut for New().WithBaseURL(BRBaseURLv1)
+func (c *client) BR() interfaces.SMSClient {
 	defer c.transact()()
 	c.baseURL = BRBaseURLv1
 	return c
 }
 
-// CA is a shortcut for New().WithCustomBaseURL(CABaseURLv1)
-func (c *client) CA() SMSClient {
+// CA is a shortcut for New().WithBaseURL(CABaseURLv1)
+func (c *client) CA() interfaces.SMSClient {
 	defer c.transact()()
 	c.baseURL = CABaseURLv1
 	return c
 }
 
 // WithAuthToken sets the auth token for the client
-func (c *client) WithAuthToken(authToken string) SMSClient {
+func (c *client) WithAuthToken(authToken string) interfaces.SMSClient {
 	defer c.transact()()
 	c.authToken = authToken
 	return c
 }
 
 // WithPlanID sets the plan ID for the client
-func (c *client) WithPlanID(planID string) SMSClient {
+func (c *client) WithPlanID(planID string) interfaces.SMSClient {
 	defer c.transact()()
 	c.planID = planID
 	return c
 }
 
 // WithCustomBaseURL sets the base URL for the client
-func (c *client) WithCustomBaseURL(baseURL string) SMSClient {
+func (c *client) WithBaseURL(baseURL string) interfaces.SMSClient {
 	defer c.transact()()
 	c.baseURL = baseURL
 	return c
 }
 
 // WithCustomHTTPClient allows you to set a custom http.Client for the SMS client to use for http requests
-func (c *client) WithCustomHTTPClient(httpClient *http.Client) SMSClient {
+func (c *client) WithCustomHTTPClient(httpClient *http.Client) interfaces.SMSClient {
 	defer c.transact()()
 	c.httpClient = httpClient
 	return c

@@ -1,6 +1,10 @@
-package sms // import sinchsms "github.com/thezmc/go-sinch/sms"
+package interfaces
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/thezmc/go-sinch/pkg/models"
+)
 
 type SMSClient interface {
 	US() SMSClient
@@ -11,7 +15,7 @@ type SMSClient interface {
 
 	WithAuthToken(authToken string) SMSClient
 	WithPlanID(planID string) SMSClient
-	WithCustomBaseURL(baseURL string) SMSClient
+	WithBaseURL(baseURL string) SMSClient
 	WithCustomHTTPClient(httpClient *http.Client) SMSClient
 	Execute(req *http.Request, resourceName string) (*http.Response, error)
 
@@ -23,7 +27,7 @@ type SMSBatchSender interface {
 	To(to ...string) SMSBatchSender
 	From(from string) SMSBatchSender
 
-	WithDeliveryReport(deliveryReport DeliveryReport) SMSBatchSender
+	WithDeliveryReport(deliveryReport models.DeliveryReport) SMSBatchSender
 	WithParameters(parameters map[string]map[string]string) SMSBatchSender
 	WithParameter(parameterName string, valueMap map[string]string) SMSBatchSender
 	WithCampaignID(campaignID string) SMSBatchSender
@@ -40,4 +44,5 @@ type SMSBatchSender interface {
 
 	Send() SMSBatchSender
 	Error() error
+	Response() *models.SendResponse
 }
