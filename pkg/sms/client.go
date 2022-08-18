@@ -1,7 +1,6 @@
 package sms // import sinchsms "github.com/thezmc/go-sinch/sms"
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 
@@ -17,7 +16,7 @@ type client struct {
 }
 
 const (
-	BaseURLv1   = "sms.api.sinch.com/xms/v1/"
+	BaseURLv1   = ".sms.api.sinch.com/xms/v1/"
 	USBaseURLv1 = "https://us" + BaseURLv1
 	EUBaseURLv1 = "https://eu" + BaseURLv1
 	AUBaseURLv1 = "https://au" + BaseURLv1
@@ -99,14 +98,15 @@ func (c *client) WithCustomHTTPClient(httpClient *http.Client) interfaces.SMSCli
 // transact locks the client and returns a function that unlocks it. Common usage pattern is to defer a call to
 // the returned function.
 // Example:
-// 	defer client.transact()()
+//
+//	defer client.transact()()
 func (c *client) transact() func() {
 	c.mutex.Lock()
 	return c.mutex.Unlock
 }
 
 // Execute executes the given request with the client's http.Client and returns the response object.
-func (c *client) Execute(req *http.Request, resourceName string) (*http.Response, error) {
+func (c *client) Execute(req *http.Request, resourceName string, queryString string) (*http.Response, error) {
 	defer c.transact()()
 	if c.authToken == "" {
 		return nil, NoAuthTokenError
@@ -116,6 +116,5 @@ func (c *client) Execute(req *http.Request, resourceName string) (*http.Response
 	}
 	req.Header.Set("Authorization", "Bearer "+c.authToken)
 	req.Header.Set("Content-Type", "application/json")
-	req.URL.Path = fmt.Sprintf("%s/%s", c.baseURL, resourceName)
 	return c.httpClient.Do(req)
 }
