@@ -229,7 +229,7 @@ func (s *batchSender) Send() interfaces.SMSBatchSender {
 		return s
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusCreated {
 		s.err = fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 		return s
 	}
