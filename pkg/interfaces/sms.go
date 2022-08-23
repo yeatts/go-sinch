@@ -17,7 +17,7 @@ type SMSClient interface {
 	WithPlanID(planID string) SMSClient
 	WithBaseURL(baseURL string) SMSClient
 	WithCustomHTTPClient(httpClient *http.Client) SMSClient
-	Execute(req *http.Request, resourceName string) (*http.Response, error)
+	Execute(req *http.Request, resourceName string, queryString string) (*http.Response, error)
 
 	NewBatchSender() SMSBatchSender
 }
@@ -45,4 +45,17 @@ type SMSBatchSender interface {
 	Send() SMSBatchSender
 	Error() error
 	Response() *models.SendResponse
+}
+
+type SMSBatchLister interface {
+	FromPage(page int) SMSBatchLister
+	WithPageSize(pageSize int) SMSBatchLister
+	From(from ...string) SMSBatchLister
+	WithStartDate(startDate string) SMSBatchLister
+	WithEndDate(endDate string) SMSBatchLister
+	WithClientReference(clientReference string) SMSBatchLister
+
+	List() SMSBatchLister
+	Error() error
+	Response() *models.ListResponse
 }

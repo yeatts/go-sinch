@@ -225,7 +225,7 @@ func (s *batchSender) Send() interfaces.SMSBatchSender {
 		s.err = err
 		return s
 	}
-	resp, err := s.client.Execute(req, sendResourceName)
+	resp, err := s.client.Execute(req, sendResourceName, "")
 	if err != nil {
 		s.err = err
 		return s
