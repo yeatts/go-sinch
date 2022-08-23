@@ -1,7 +1,6 @@
 package models // import sinchsms "github.com/thezmc/go-sinch/sms"
 
-// SendRequest represents the request body for sending SMS messages.
-//
+import "encoding/json" // SendRequest represents the request body for sending SMS messages.
 // Ref: https://developers.sinch.com/docs/sms/api-reference/sms/tag/Batches/#tag/Batches/operation/SendSMS
 type SendRequest struct {
 	Body                    string                       `json:"body"`                                  // The message content
@@ -32,6 +31,10 @@ const (
 )
 
 func (dr DeliveryReport) String() string {
+	return dr.toString()
+}
+
+func (dr DeliveryReport) toString() string {
 	switch dr {
 	case None:
 		return "none"
@@ -43,6 +46,34 @@ func (dr DeliveryReport) String() string {
 		return "per_recipient"
 	}
 	return "none"
+}
+
+func toDR(s string) DeliveryReport {
+	switch s {
+	case "none":
+		return None
+	case "summary":
+		return Summary
+	case "full":
+		return Full
+	case "per_recipient":
+		return PerRecipient
+	}
+	return None
+}
+
+func (dr DeliveryReport) MarshalJSON() ([]byte, error) {
+	return json.Marshal(dr.String())
+}
+
+func (dr *DeliveryReport) UnmarshalJSON(data []byte) error {
+	var s string
+	err := json.Unmarshal(data, &s)
+	if err != nil {
+		return err
+	}
+	*dr = toDR(s)
+	return nil
 }
 
 type Type int
