@@ -48,7 +48,7 @@ func (dr DeliveryReport) toString() string {
 	return "none"
 }
 
-func toDR(s string) DeliveryReport {
+func toDeliveryReport(s string) DeliveryReport {
 	switch s {
 	case "none":
 		return None
@@ -72,7 +72,7 @@ func (dr *DeliveryReport) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	*dr = toDR(s)
+	*dr = toDeliveryReport(s)
 	return nil
 }
 
@@ -84,6 +84,10 @@ const (
 )
 
 func (t Type) String() string {
+	return t.toString()
+}
+
+func (t Type) toString() string {
 	switch t {
 	case Text:
 		return "mt_text"
@@ -91,6 +95,30 @@ func (t Type) String() string {
 		return "mt_binary"
 	}
 	return "mt_text"
+}
+
+func toType(s string) Type {
+	switch s {
+	case "mt_text":
+		return Text
+	case "mt_binary":
+		return Binary
+	}
+	return Text
+}
+
+func (t Type) MarshalJSON() ([]byte, error) {
+	return json.Marshal(t.String())
+}
+
+func (t *Type) UnmarshalJSON(data []byte) error {
+	var s string
+	err := json.Unmarshal(data, &s)
+	if err != nil {
+		return err
+	}
+	*t = toType(s)
+	return nil
 }
 
 type SendResponse struct {
