@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -15,8 +14,8 @@ import (
 )
 
 const (
-	sendResourceName = "batches"
-	iso8601          = "2006-01-02T15:04:05.000Z"
+	ResouceName = "batches"
+	iso8601     = "2006-01-02T15:04:05.000Z"
 )
 
 type batchSender struct {
@@ -188,9 +187,8 @@ func (s *batchSender) validate() error {
 	return nil
 }
 
-// toIOReader converts the SMSSendRequest to json and encodes it into a buffer. Returns an io.Reader with the encoded
-// data.
-func (s *batchSender) toIOReader() (io.Reader, error) {
+// toBytes converts the SMSSendRequest to json and encodes it into a bytes.Buffer. Returns a pointer to that buffer.
+func (s *batchSender) toBytes() (*bytes.Buffer, error) {
 	buffer := new(bytes.Buffer)
 	encoder := json.NewEncoder(buffer)
 	encoder.SetEscapeHTML(false)
@@ -202,11 +200,11 @@ func (s *batchSender) toIOReader() (io.Reader, error) {
 
 // toRequest converts the SMSSendRequest to an http.Request.
 func (s *batchSender) toRequest() (*http.Request, error) {
-	json, err := s.toIOReader()
+	json, err := s.toBytes()
 	if err != nil {
 		return nil, err
 	}
-	sendURL := fmt.Sprintf("%s/%s/%s", s.client.baseURL, s.client.planID, sendResourceName)
+	sendURL := fmt.Sprintf("%s/%s/%s", s.client.baseURL, s.client.planID, ResouceName)
 	req, err := http.NewRequest(http.MethodPost, sendURL, json)
 	if err != nil {
 		return nil, err
@@ -225,7 +223,7 @@ func (s *batchSender) Send() interfaces.SMSBatchSender {
 		s.err = err
 		return s
 	}
-	resp, err := s.client.Execute(req, sendResourceName, "")
+	resp, err := s.client.Execute(req, ResouceName, "")
 	if err != nil {
 		s.err = err
 		return s

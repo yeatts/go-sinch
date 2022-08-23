@@ -22,14 +22,45 @@ type SendRequest struct {
 	FromNumberPlanIndicator int                          `json:"from_npi,omitempty"`                    // Number Plan Indicator for the sender number. Use to override the automatic detection.
 }
 
-type DeliveryReport string
+type DeliveryReport int
 
 const (
-	None         DeliveryReport = "none"
-	Summary      DeliveryReport = "summary"
-	Full         DeliveryReport = "full"
-	PerRecipient DeliveryReport = "per_recipient"
+	None DeliveryReport = iota
+	Summary
+	Full
+	PerRecipient
 )
+
+func (dr DeliveryReport) String() string {
+	switch dr {
+	case None:
+		return "none"
+	case Summary:
+		return "summary"
+	case Full:
+		return "full"
+	case PerRecipient:
+		return "per_recipient"
+	}
+	return "none"
+}
+
+type Type int
+
+const (
+	Text Type = iota
+	Binary
+)
+
+func (t Type) String() string {
+	switch t {
+	case Text:
+		return "mt_text"
+	case Binary:
+		return "mt_binary"
+	}
+	return "mt_text"
+}
 
 type SendResponse struct {
 	SendRequest
@@ -37,4 +68,36 @@ type SendResponse struct {
 	Canceled   bool   `json:"canceled"`    // Indicates if the batch has been canceled or not
 	CreatedAt  string `json:"created_at"`  // Timestamp for when batch was created. Formatted as ISO-8601: YYYY-MM-DDThh:mm:ss.SSSZ
 	ModifiedAt string `json:"modified_at"` // Timestamp for when batch was last updated. Formatted as ISO-8601: YYYY-MM-DDThh:mm:ss.SSSZ
+}
+
+type ListRequest struct {
+	Page            int      `url:"page"`             // The page number of the results to be returned. Default is 0.
+	PageSize        int      `url:"page_size"`        // The number of results to be returned per page. Default is 30.
+	From            []string `url:"from"`             // List of phone numbers from where the batch was sent.
+	StartDate       string   `url:"start_date"`       // Only list batches sent after this date. Formatted as ISO-8601: YYYY-MM-DDThh:mm:ss.SSSZ
+	EndDate         string   `url:"end_date"`         // Only list batches sent before this date. Formatted as ISO-8601: YYYY-MM-DDThh:mm:ss.SSSZ
+	ClientReference string   `url:"client_reference"` // Only list batches with this client reference.
+}
+
+type ListResponse struct {
+	Page     int     `json:"page"`      // The page number of the results being returned.
+	Count    int     `json:"count"`     // The number of results in the full data set.
+	PageSize int     `json:"page_size"` // The number of results per page.
+	Batches  []Batch `json:"batches"`   // The list of batches.
+}
+
+type Batch struct {
+	To                      []string                     `json:"to"`                                    // List of phone numbers to which the batch was sent.
+	Body                    string                       `json:"body"`                                  // The message content.
+	From                    string                       `json:"from,omitempty"`                        // Sender phone number. Could also be a Sender ID.
+	Type                    Type                         `json:"type,omitempty"`                        // The type of number for the sender number.
+	UDH                     string                       `json:"udh,omitempty"`                         // The UDH header for a binary message. Max 140 bytes with the body.
+	DeliveryReport          DeliveryReport               `json:"delivery_report,omitempty"`             // The delivery report type.
+	SendAt                  string                       `json:"send_at,omitempty"`                     // The timestamp for when the batch was/will be sent. Formatted as ISO-8601: YYYY-MM-DDThh:mm:ss.SSSZ
+	ExpireAt                string                       `json:"expire_at,omitempty"`                   // The timestamp for when the batch will expire. Formatted as ISO-8601: YYYY-MM-DDThh:mm:ss.SSSZ
+	CallbackURL             string                       `json:"callback_url,omitempty"`                // The callback URL for the batch.
+	FlashMessage            bool                         `json:"flash_message,omitempty"`               // Indicates if the message is a flash message.
+	Parameters              map[string]map[string]string `json:"parameters,omitempty"`                  // The parameters for the batch.
+	ClientReference         string                       `json:"client_reference,omitempty"`            // The client identifier of a batch message.
+	MaxNumberOfMessageParts int                          `json:"max_number_of_message_parts,omitempty"` // The maximum number of message parts for the batch.
 }
