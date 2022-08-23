@@ -16,7 +16,7 @@ type client struct {
 }
 
 const (
-	BaseURLv1   = ".sms.api.sinch.com/xms/v1/"
+	BaseURLv1   = ".sms.api.sinch.com/xms/v1"
 	USBaseURLv1 = "https://us" + BaseURLv1
 	EUBaseURLv1 = "https://eu" + BaseURLv1
 	AUBaseURLv1 = "https://au" + BaseURLv1
