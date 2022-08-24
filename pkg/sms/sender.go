@@ -234,12 +234,12 @@ func (s *batchSender) Send() interfaces.SMSBatchSender {
 		return s
 	}
 	var response *models.SendResponse
-	if err := json.NewDecoder(resp.Body).Decode(response); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		s.err = err
 		return s
 	}
 	s.response = response
-	return nil
+	return s
 }
 
 // Request returns the SMSSendRequest used to send the SMS.
