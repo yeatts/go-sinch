@@ -8,7 +8,7 @@ import (
 	"github.com/thezmc/go-sinch/pkg/sinch"
 )
 
-var FakeError = sinch.Error("fake error")
+var FakeError = sinch.Error("test error")
 var OkHandler = func(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
