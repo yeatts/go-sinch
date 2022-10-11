@@ -1,6 +1,8 @@
-package models // import sinchsms "github.com/thezmc/go-sinch/sms"
+package sms
 
-import "encoding/json" // SendRequest represents the request body for sending SMS messages.
+import "encoding/json"
+
+// SendRequest represents the request body for sending SMS messages.
 // Ref: https://developers.sinch.com/docs/sms/api-reference/sms/tag/Batches/#tag/Batches/operation/SendSMS
 type SendRequest struct {
 	Body                    string                       `json:"body"`                                  // The message content
