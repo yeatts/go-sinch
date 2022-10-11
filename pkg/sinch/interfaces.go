@@ -25,6 +25,7 @@ type APIResponse interface {
 type APIClient interface {
 	Validatable
 	URL() string
+	Do(APIRequest, APIResponse) error
 }
 
 type API interface {

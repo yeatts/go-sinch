@@ -71,6 +71,6 @@ func (c *Client) Validate() error {
 }
 
 // Do executes the given request with the client's http.Client and returns the response object.
-func (c *Client) Do(req sinch.APIRequest, recv sinch.APIResponse) error {
-	return c.SinchAPI.Do(c, req, recv)
+func (c *Client) Do(req sinch.APIRequest, resp sinch.APIResponse) error {
+	return c.SinchAPI.Do(c, req, resp)
 }

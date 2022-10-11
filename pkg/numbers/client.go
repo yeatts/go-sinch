@@ -35,6 +35,6 @@ func (c *Client) URL() string {
 	return c.SinchAPI.BaseURL + "/" + c.ProjectID
 }
 
-func (c *Client) Do(action sinch.Action[sinch.APIRequest, sinch.APIResponse]) error {
-	return c.SinchAPI.Do(c, action.Request(), action.Response())
+func (c *Client) Do(req sinch.APIRequest, resp sinch.APIResponse) error {
+	return c.SinchAPI.Do(c, req, resp)
 }

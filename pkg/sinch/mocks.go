@@ -68,6 +68,11 @@ func (m *MockAPIClient) URL() string {
 	return args.String(0)
 }
 
+func (m *MockAPIClient) Do(req APIRequest, resp APIResponse) error {
+	args := m.Called(req, resp)
+	return args.Error(0)
+}
+
 type MockValidatable struct {
 	mock.Mock
 }
