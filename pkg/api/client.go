@@ -9,13 +9,19 @@ import (
 )
 
 type Client struct {
-	AuthToken  string
+	KeyID      string
+	KeySecret  string
 	BaseURL    string
 	HTTPClient *http.Client
 }
 
-func (api *Client) WithAuthToken(authToken string) *Client {
-	api.AuthToken = authToken
+func (api *Client) WithKeyID(keyID string) *Client {
+	api.KeyID = keyID
+	return api
+}
+
+func (api *Client) WithKeySecret(keySecret string) *Client {
+	api.KeySecret = keySecret
 	return api
 }
 
@@ -29,13 +35,12 @@ func (api *Client) WithHTTPClient(httpClient *http.Client) *Client {
 	return api
 }
 
-func (c Client) Credentials() (string, string) {
-	return "Authorization", "Bearer " + c.AuthToken
-}
-
 func (c Client) Validate() error {
-	if c.AuthToken == "" {
-		return NoAuthTokenError
+	if c.KeyID == "" {
+		return NoKeyIDError
+	}
+	if c.KeySecret == "" {
+		return NoKeySecretError
 	}
 	if c.BaseURL == "" {
 		return NoBaseURLError
@@ -67,7 +72,7 @@ func (c Client) Do(client sinch.APIClient, req sinch.APIRequest, recv sinch.APIR
 		return err
 	}
 
-	httpReq.Header.Set(c.Credentials())
+	httpReq.SetBasicAuth(c.KeyID, c.KeySecret)
 	if httpReq.ContentLength > 0 {
 		httpReq.Header.Set("Content-Type", "application/json")
 	}
