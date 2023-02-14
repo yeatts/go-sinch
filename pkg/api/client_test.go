@@ -19,7 +19,7 @@ func Test_Do(t *testing.T) {
 	var mockClient *sinch.MockAPIClient
 	var mockHTTPSrv *httptest.Server
 
-	client := new(Client).WithAuthToken("foo").WithBaseURL("https://notareal.domain")
+	client := new(Client).WithKeyID("foo").WithKeySecret("bar").WithBaseURL("https://notareal.domain")
 
 	tests := map[string]struct {
 		configFn func()
@@ -157,26 +157,34 @@ func Test_Do(t *testing.T) {
 
 func Test_Validate(t *testing.T) {
 	client := new(Client)
+	testKeyID := "testID"
+	testKeySecret := "testSecret"
 
 	tests := map[string]struct {
 		configFn    func()
 		expectedErr error
 	}{
-		"no auth token": {
+		"no key ID": {
 			configFn: func() {
-				client.WithAuthToken("")
+				client.WithKeyID("").WithKeySecret(testKeySecret)
 			},
-			expectedErr: NoAuthTokenError,
+			expectedErr: NoKeyIDError,
+		},
+		"no key secret": {
+			configFn: func() {
+				client.WithKeyID(testKeyID).WithKeySecret("")
+			},
+			expectedErr: NoKeySecretError,
 		},
 		"no base url": {
 			configFn: func() {
-				client.WithAuthToken("test").WithBaseURL("")
+				client.WithKeyID(testKeyID).WithKeySecret(testKeySecret).WithBaseURL("")
 			},
 			expectedErr: NoBaseURLError,
 		},
 		"no http client": {
 			configFn: func() {
-				client.WithAuthToken("test").WithBaseURL("test").WithHTTPClient(nil)
+				client.WithKeyID(testKeyID).WithKeySecret(testKeySecret).WithBaseURL("test").WithHTTPClient(nil)
 			},
 			expectedErr: NilHTTPClientError,
 		},
