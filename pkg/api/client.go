@@ -79,7 +79,7 @@ func (c Client) Do(client sinch.APIClient, req sinch.APIRequest, recv sinch.APIR
 	defer httpResp.Body.Close()
 
 	if httpResp.StatusCode != req.ExpectedStatusCode() {
-		return UnexpectedStatusCodeErr(httpResp.StatusCode, req.ExpectedStatusCode())
+		return UnexpectedStatusCodeErr(req.ExpectedStatusCode(), httpResp.StatusCode)
 	}
 
 	respBody, err := io.ReadAll(httpResp.Body)
