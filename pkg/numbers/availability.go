@@ -7,6 +7,7 @@ import (
 	"github.com/biter777/countries"
 	"github.com/google/go-querystring/query"
 	"github.com/thezmc/go-sinch/pkg/sinch"
+	"go.uber.org/multierr"
 )
 
 type AvailabilityAction struct {
@@ -148,7 +149,10 @@ func (ac *AvailabilityRequest) Validate() error {
 	if ac.Type == "" {
 		errs = append(errs, TypeRequiredError)
 	}
-	return errs
+	if len(errs) > 0 {
+		return multierr.Combine(errs)
+	}
+	return nil
 }
 
 func (ac *AvailabilityRequest) ExpectedStatusCode() int {
