@@ -1,5 +1,7 @@
 package sinch
 
+import "net/http"
+
 type Validatable interface {
 	Validate() error
 }
@@ -24,6 +26,7 @@ type APIResponse interface {
 
 type APIClient interface {
 	Validatable
+	Authenticate(*http.Request) (*http.Request, error)
 	URL() string
 	Do(APIRequest, APIResponse) error
 }
