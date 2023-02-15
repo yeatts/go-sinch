@@ -13,10 +13,6 @@ type Client struct {
 	HTTPClient *http.Client
 }
 
-func (api *Client) WithAuthToken(authToken string) *Client {
-	return api
-}
-
 func (api *Client) WithBaseURL(baseURL string) *Client {
 	api.BaseURL = baseURL
 	return api

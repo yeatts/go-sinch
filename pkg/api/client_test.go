@@ -178,8 +178,6 @@ func Test_Do(t *testing.T) {
 
 func Test_Validate(t *testing.T) {
 	client := new(Client)
-	testKeyID := "testID"
-	testKeySecret := "testSecret"
 
 	tests := map[string]struct {
 		configFn    func()
@@ -187,13 +185,13 @@ func Test_Validate(t *testing.T) {
 	}{
 		"no base url": {
 			configFn: func() {
-				client.WithKeyID(testKeyID).WithKeySecret(testKeySecret).WithBaseURL("")
+				client.WithBaseURL("")
 			},
 			expectedErr: NoBaseURLError,
 		},
 		"no http client": {
 			configFn: func() {
-				client.WithKeyID(testKeyID).WithKeySecret(testKeySecret).WithBaseURL("test").WithHTTPClient(nil)
+				client.WithBaseURL("test").WithHTTPClient(nil)
 			},
 			expectedErr: NilHTTPClientError,
 		},
