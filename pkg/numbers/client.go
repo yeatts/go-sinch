@@ -1,6 +1,8 @@
 package numbers
 
 import (
+	"net/http"
+
 	"github.com/thezmc/go-sinch/pkg/api"
 	"github.com/thezmc/go-sinch/pkg/sinch"
 )
@@ -8,6 +10,8 @@ import (
 type Client struct {
 	SinchAPI  api.Client
 	ProjectID string
+	KeyID     string
+	KeySecret string
 }
 
 const (
@@ -24,11 +28,32 @@ func (c *Client) WithProjectID(projectID string) *Client {
 	return c
 }
 
+func (c *Client) WithKeyID(keyID string) *Client {
+	c.KeyID = keyID
+	return c
+}
+
+func (c *Client) WithKeySecret(KeySecret string) *Client {
+	c.KeySecret = KeySecret
+	return c
+}
+
 func (c *Client) Validate() error {
 	if c.ProjectID == "" {
 		return ProjectIDRequiredError
 	}
+	if c.KeyID == "" {
+		return KeyIDRequiredError
+	}
+	if c.KeySecret == "" {
+		return KeySecretRequiredError
+	}
 	return nil
+}
+
+func (c *Client) Authenticate(httpReq *http.Request) (*http.Request, error) {
+	httpReq.SetBasicAuth(c.KeyID, c.KeySecret)
+	return httpReq, nil
 }
 
 func (c *Client) URL() string {

@@ -20,8 +20,6 @@ func (e Errors) Error() string {
 }
 
 const (
-	NoKeyIDError              = Error("a key ID is required")
-	NoKeySecretError          = Error("a key secret is required")
 	NoBaseURLError            = Error("a base URL is required")
 	NilHTTPClientError        = Error("an HTTP client is required")
 	UnexpectedStatusCodeError = Error("unexpected status code")

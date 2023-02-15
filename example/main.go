@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-	apiClient := new(api.Client).WithAuthToken("YOUR_AUTH_TOKEN")
-	smsClient := new(sms.Client).WithPlanID("YOUR_PLAN_ID").WithSinchAPI(apiClient)
+	apiClient := new(api.Client)
+	smsClient := new(sms.Client).WithPlanID("YOUR_PLAN_ID").WithAuthToken("YOUR_AUTH_TOKEN").WithSinchAPI(apiClient)
 
 	request := new(sms.BatchSendRequest).
 		To("RECIPIENT_PHONE_NUMBER").

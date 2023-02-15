@@ -1,13 +1,16 @@
 package sms // import sinchsms "github.com/thezmc/go-sinch/sms"
 
 import (
+	"net/http"
+
 	"github.com/thezmc/go-sinch/pkg/api"
 	"github.com/thezmc/go-sinch/pkg/sinch"
 )
 
 type Client struct {
-	SinchAPI api.Client
-	PlanID   string
+	SinchAPI  api.Client
+	PlanID    string
+	AuthToken string
 }
 
 const (
@@ -63,11 +66,28 @@ func (c *Client) URL() string {
 	return c.SinchAPI.BaseURL + "/" + c.PlanID
 }
 
+func (api *Client) WithAuthToken(authToken string) *Client {
+	api.AuthToken = authToken
+	return api
+}
+
+func (c Client) Credentials() (string, string) {
+	return "Authorization", "Bearer " + c.AuthToken
+}
+
 func (c *Client) Validate() error {
 	if c.PlanID == "" {
 		return NoPlanIDError
 	}
+	if c.AuthToken == "" {
+		return NoAuthTokenError
+	}
 	return nil
+}
+
+func (c *Client) Authenticate(httpReq *http.Request) (*http.Request, error) {
+	httpReq.Header.Set(c.Credentials())
+	return httpReq, nil
 }
 
 // Do executes the given request with the client's http.Client and returns the response object.
