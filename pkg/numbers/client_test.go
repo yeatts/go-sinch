@@ -10,8 +10,6 @@ import (
 	"github.com/thezmc/go-sinch/pkg/sinch"
 )
 
-var FakeError = sinch.Error("test error")
-
 type MockNumbersAction struct {
 	mock.Mock
 }

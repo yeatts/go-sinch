@@ -7,8 +7,6 @@ import (
 	"github.com/thezmc/go-sinch/pkg/sinch"
 )
 
-var FakeError = sinch.Error("test error")
-
 func Test_Client_Implementations(t *testing.T) {
 	var _ sinch.APIClient = new(Client)
 }
