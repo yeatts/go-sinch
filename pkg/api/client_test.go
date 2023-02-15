@@ -62,6 +62,21 @@ func Test_Do(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		"failed client authentication": {
+			configFn: func() {
+				mockHTTPSrv = httptest.NewServer(http.RedirectHandler("https://notareal.domain", http.StatusMovedPermanently))
+				mockClient.On("Validate").Return(nil)
+				mockRequest.On("Validate").Return(nil)
+				mockRequest.On("QueryString").Return("", nil)
+				mockRequest.On("Body").Return([]byte{}, nil)
+				mockRequest.On("Method").Return("GET")
+				mockRequest.On("Path").Return("/not/a/real/path")
+				mockClient.On("URL").Return(mockHTTPSrv.URL)
+				mockClient.On("Authenticate", mock.Anything).Return((*http.Request)(nil), FakeError)
+				client.WithHTTPClient(mockHTTPSrv.Client())
+			},
+			wantErr: true,
+		},
 		"http client do error": {
 			configFn: func() {
 				mockHTTPSrv = httptest.NewServer(http.RedirectHandler("https://notareal.domain", http.StatusMovedPermanently))
