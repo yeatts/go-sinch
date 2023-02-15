@@ -1,7 +1,6 @@
 package numbers
 
 import (
-	"net/http"
 	"testing"
 
 	"github.com/samber/lo"
@@ -12,9 +11,6 @@ import (
 )
 
 var FakeError = sinch.Error("test error")
-var OkHandler = func(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
 
 type MockNumbersAction struct {
 	mock.Mock
