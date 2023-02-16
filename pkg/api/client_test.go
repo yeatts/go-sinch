@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/thezmc/go-sinch/pkg/sinch"
 )
 
@@ -19,7 +20,7 @@ func Test_Do(t *testing.T) {
 	var mockClient *sinch.MockAPIClient
 	var mockHTTPSrv *httptest.Server
 
-	client := new(Client).WithAuthToken("foo").WithBaseURL("https://notareal.domain")
+	client := new(Client).WithBaseURL("https://notareal.domain")
 
 	tests := map[string]struct {
 		configFn func()
@@ -61,6 +62,21 @@ func Test_Do(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		"failed client authentication": {
+			configFn: func() {
+				mockHTTPSrv = httptest.NewServer(http.RedirectHandler("https://notareal.domain", http.StatusMovedPermanently))
+				mockClient.On("Validate").Return(nil)
+				mockRequest.On("Validate").Return(nil)
+				mockRequest.On("QueryString").Return("", nil)
+				mockRequest.On("Body").Return([]byte{}, nil)
+				mockRequest.On("Method").Return("GET")
+				mockRequest.On("Path").Return("/not/a/real/path")
+				mockClient.On("URL").Return(mockHTTPSrv.URL)
+				mockClient.On("Authenticate", mock.Anything).Return((*http.Request)(nil), FakeError)
+				client.WithHTTPClient(mockHTTPSrv.Client())
+			},
+			wantErr: true,
+		},
 		"http client do error": {
 			configFn: func() {
 				mockHTTPSrv = httptest.NewServer(http.RedirectHandler("https://notareal.domain", http.StatusMovedPermanently))
@@ -71,6 +87,7 @@ func Test_Do(t *testing.T) {
 				mockRequest.On("Method").Return("GET")
 				mockRequest.On("Path").Return("/not/a/real/path")
 				mockClient.On("URL").Return(mockHTTPSrv.URL)
+				mockClient.On("Authenticate", mock.Anything).Return((*http.Request)(nil), nil)
 				httpClient := mockHTTPSrv.Client()
 				httpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 					return FakeError
@@ -88,6 +105,7 @@ func Test_Do(t *testing.T) {
 				mockRequest.On("Body").Return([]byte{}, nil)
 				mockRequest.On("Method").Return("GET")
 				mockRequest.On("Path").Return("/not/a/real/path")
+				mockClient.On("Authenticate", mock.Anything).Return((*http.Request)(nil), nil)
 				mockRequest.On("ExpectedStatusCode").Return(http.StatusTeapot)
 				mockClient.On("URL").Return(mockHTTPSrv.URL)
 				client.WithHTTPClient(mockHTTPSrv.Client())
@@ -103,6 +121,7 @@ func Test_Do(t *testing.T) {
 				mockRequest.On("Body").Return([]byte{}, nil)
 				mockRequest.On("Method").Return("GET")
 				mockRequest.On("Path").Return("/not/a/real/path")
+				mockClient.On("Authenticate", mock.Anything).Return((*http.Request)(nil), nil)
 				mockRequest.On("ExpectedStatusCode").Return(http.StatusOK)
 				mockResponse.On("FromJSON").Return(FakeError)
 				mockClient.On("URL").Return(mockHTTPSrv.URL)
@@ -119,6 +138,7 @@ func Test_Do(t *testing.T) {
 				mockRequest.On("Body").Return([]byte{}, nil)
 				mockRequest.On("Method").Return("GET")
 				mockRequest.On("Path").Return("/not/a/real/path")
+				mockClient.On("Authenticate", mock.Anything).Return((*http.Request)(nil), nil)
 				mockRequest.On("ExpectedStatusCode").Return(http.StatusOK)
 				mockResponse.On("FromJSON").Return(nil)
 				mockClient.On("URL").Return(mockHTTPSrv.URL)
@@ -135,6 +155,7 @@ func Test_Do(t *testing.T) {
 				mockRequest.On("Body").Return([]byte("hello"), nil)
 				mockRequest.On("Method").Return("GET")
 				mockRequest.On("Path").Return("/not/a/real/path")
+				mockClient.On("Authenticate", mock.Anything).Return((*http.Request)(nil), nil)
 				mockRequest.On("ExpectedStatusCode").Return(http.StatusOK)
 				mockResponse.On("FromJSON").Return(nil)
 				mockClient.On("URL").Return(mockHTTPSrv.URL)
@@ -162,21 +183,15 @@ func Test_Validate(t *testing.T) {
 		configFn    func()
 		expectedErr error
 	}{
-		"no auth token": {
-			configFn: func() {
-				client.WithAuthToken("")
-			},
-			expectedErr: NoAuthTokenError,
-		},
 		"no base url": {
 			configFn: func() {
-				client.WithAuthToken("test").WithBaseURL("")
+				client.WithBaseURL("")
 			},
 			expectedErr: NoBaseURLError,
 		},
 		"no http client": {
 			configFn: func() {
-				client.WithAuthToken("test").WithBaseURL("test").WithHTTPClient(nil)
+				client.WithBaseURL("test").WithHTTPClient(nil)
 			},
 			expectedErr: NilHTTPClientError,
 		},

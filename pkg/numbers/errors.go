@@ -4,6 +4,8 @@ import "github.com/thezmc/go-sinch/pkg/sinch"
 
 const (
 	ProjectIDRequiredError     = sinch.Error("project ID is required")
+	KeyIDRequiredError         = sinch.Error("key ID is required")
+	KeySecretRequiredError     = sinch.Error("key secret is required")
 	RegionCodeRequiredError    = sinch.Error("region code is required")
 	TypeRequiredError          = sinch.Error("type is required")
 	PhoneNumberRequiredError   = sinch.Error("phone number is required")

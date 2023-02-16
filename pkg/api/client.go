@@ -9,14 +9,8 @@ import (
 )
 
 type Client struct {
-	AuthToken  string
 	BaseURL    string
 	HTTPClient *http.Client
-}
-
-func (api *Client) WithAuthToken(authToken string) *Client {
-	api.AuthToken = authToken
-	return api
 }
 
 func (api *Client) WithBaseURL(baseURL string) *Client {
@@ -29,14 +23,7 @@ func (api *Client) WithHTTPClient(httpClient *http.Client) *Client {
 	return api
 }
 
-func (c Client) Credentials() (string, string) {
-	return "Authorization", "Bearer " + c.AuthToken
-}
-
 func (c Client) Validate() error {
-	if c.AuthToken == "" {
-		return NoAuthTokenError
-	}
 	if c.BaseURL == "" {
 		return NoBaseURLError
 	}
@@ -67,7 +54,11 @@ func (c Client) Do(client sinch.APIClient, req sinch.APIRequest, recv sinch.APIR
 		return err
 	}
 
-	httpReq.Header.Set(c.Credentials())
+	_, err = client.Authenticate(httpReq)
+	if err != nil {
+		return err
+	}
+
 	if httpReq.ContentLength > 0 {
 		httpReq.Header.Set("Content-Type", "application/json")
 	}
@@ -79,7 +70,7 @@ func (c Client) Do(client sinch.APIClient, req sinch.APIRequest, recv sinch.APIR
 	defer httpResp.Body.Close()
 
 	if httpResp.StatusCode != req.ExpectedStatusCode() {
-		return UnexpectedStatusCodeErr(httpResp.StatusCode, req.ExpectedStatusCode())
+		return UnexpectedStatusCodeErr(req.ExpectedStatusCode(), httpResp.StatusCode)
 	}
 
 	respBody, err := io.ReadAll(httpResp.Body)

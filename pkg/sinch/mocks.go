@@ -1,6 +1,10 @@
 package sinch
 
-import "github.com/stretchr/testify/mock"
+import (
+	"net/http"
+
+	"github.com/stretchr/testify/mock"
+)
 
 type MockAPIRequest struct {
 	mock.Mock
@@ -61,6 +65,11 @@ type MockAPIClient struct {
 func (m *MockAPIClient) Validate() error {
 	args := m.Called()
 	return args.Error(0)
+}
+
+func (m *MockAPIClient) Authenticate(httpReq *http.Request) (*http.Request, error) {
+	args := m.Called(httpReq)
+	return args.Get(0).(*http.Request), args.Error(1)
 }
 
 func (m *MockAPIClient) URL() string {

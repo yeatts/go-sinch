@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/samber/lo"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/thezmc/go-sinch/pkg/api"
 	"github.com/thezmc/go-sinch/pkg/sinch"
@@ -38,10 +39,63 @@ func Test_WithProjectID(t *testing.T) {
 	}
 }
 
-func Test_Validate(t *testing.T) {
-	client := new(Client)
-	if err := client.Validate(); err != ProjectIDRequiredError {
-		t.Errorf("expected ProjectIDRequiredError, got %v", err)
+func Test_WithKeyID(t *testing.T) {
+	client := new(Client).WithKeyID("bar")
+	if client.KeyID != "bar" {
+		t.Errorf("expected KeyID to be bar, got " + client.KeyID)
+	}
+}
+
+func Test_WithKeySecret(t *testing.T) {
+	client := new(Client).WithKeySecret("baz")
+	if client.KeySecret != "baz" {
+		t.Errorf("expected KeySecret to be baz, got " + client.KeyID)
+	}
+}
+
+func Test_Client_Validate(t *testing.T) {
+	var c *Client
+	testProjectID := "testProjectID"
+	testKeyID := "testKeyID"
+	testKeySecret := "testKeySecret"
+	tests := map[string]struct {
+		configFn    func()
+		expectedErr error
+	}{
+		"missing project id": {
+			configFn: func() {
+				c = new(Client).WithKeyID(testKeyID).WithKeySecret(testKeySecret)
+			},
+			expectedErr: ProjectIDRequiredError,
+		},
+		"missing key ID": {
+			configFn: func() {
+				c = new(Client).WithProjectID(testProjectID).WithKeySecret(testKeySecret)
+			},
+			expectedErr: KeyIDRequiredError,
+		},
+		"missing key secret": {
+			configFn: func() {
+				c = new(Client).WithProjectID(testProjectID).WithKeyID(testKeyID)
+			},
+			expectedErr: KeySecretRequiredError,
+		},
+		"no error": {
+			configFn: func() {
+				c = new(Client).WithProjectID(testProjectID).WithKeyID(testKeyID).WithKeySecret(testKeySecret)
+			},
+			expectedErr: nil,
+		},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			test.configFn()
+			if test.expectedErr != nil {
+				assert.ErrorContains(t, c.Validate(), test.expectedErr.Error())
+			} else {
+				assert.NoError(t, c.Validate())
+			}
+		})
 	}
 }
 

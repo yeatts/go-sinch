@@ -13,19 +13,27 @@ func Test_Client_Implementations(t *testing.T) {
 
 func Test_Client_Validate(t *testing.T) {
 	var c *Client
+	testAuthToken := "testToken"
+	testPlanID := "testPlanID"
 	tests := map[string]struct {
 		configFn    func()
 		expectedErr error
 	}{
 		"missing plan id": {
 			configFn: func() {
-				c = new(Client)
+				c = new(Client).WithAuthToken(testAuthToken)
 			},
 			expectedErr: NoPlanIDError,
 		},
+		"missing auth token": {
+			configFn: func() {
+				c = new(Client).WithPlanID(testPlanID)
+			},
+			expectedErr: NoAuthTokenError,
+		},
 		"no error": {
 			configFn: func() {
-				c = new(Client).WithPlanID("test")
+				c = new(Client).WithPlanID(testPlanID).WithAuthToken(testAuthToken)
 			},
 			expectedErr: nil,
 		},
