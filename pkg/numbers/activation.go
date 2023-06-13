@@ -18,15 +18,6 @@ type ActivationRequest struct {
 	VoiceConfiguration *RequestVoiceConfiguration `url:"-" json:"voiceConfiguration,omitempty"`
 }
 
-type RequestSMSConfiguration struct {
-	ServicePlanID string `json:"servicePlanId"` // required
-	CampaignID    string `json:"campaignId"`
-}
-
-type RequestVoiceConfiguration struct {
-	AppID string `json:"appId"`
-}
-
 type ActivationResponse struct {
 	PhoneNumber           string                      `json:"phoneNumber"`
 	ProjectID             string                      `json:"projectId"`
@@ -40,31 +31,6 @@ type ActivationResponse struct {
 	ExpireAt              string                      `json:"expireAt"`
 	SMSConfiguration      *ResponseSMSConfiguration   `json:"smsConfiguration"`
 	VoiceConfiguration    *ResponseVoiceConfiguration `json:"voiceConfiguration,omitempty"`
-	LastUpdatedTime       string                      `json:"lastUpdatedTime"`
-}
-
-type ResponseSMSConfiguration struct {
-	ServicePlanID         string                         `json:"servicePlanId"` // required
-	ScheduledProvisioning *ResponseScheduledProvisioning `json:"scheduledProvisioning"`
-}
-
-type ResponseScheduledProvisioning struct {
-	ServicePlanID   string   `json:"servicePlanId"`
-	Status          string   `json:"status"`
-	LastUpdatedTime string   `json:"lastUpdatedTime"`
-	CampaignID      string   `json:"campaignId"`
-	ErrorCodes      []string `json:"errorCodes"`
-}
-
-type ResponseVoiceConfiguration struct {
-	AppID                      string                              `json:"appId"`
-	ScheduledVoiceProvisioning *ResponseScheduledVoiceProvisioning `json:"scheduledVoiceProvisioning"`
-}
-
-type ResponseScheduledVoiceProvisioning struct {
-	AppID           string `json:"appId"`
-	Status          string `json:"status"`
-	LastUpdatedTime string `json:"lastUpdatedTime"`
 }
 
 func (a *Activation) IsNumbersAction() {}
@@ -92,7 +58,7 @@ func (ar *ActivationRequest) WithPhoneNumber(phoneNumber string) *ActivationRequ
 	return ar
 }
 
-func (ar *ActivationRequest) WithSMSConfiguration(servicePlanID, campaignID string) *ActivationRequest {
+func (ar *ActivationRequest) WithSMSConfiguration(servicePlanID string, campaignID string) *ActivationRequest {
 	if ar.SMSConfiguration == nil {
 		ar.SMSConfiguration = new(RequestSMSConfiguration)
 	}
