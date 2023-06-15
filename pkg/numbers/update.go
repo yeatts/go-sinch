@@ -64,33 +64,16 @@ func (ur *UpdateRequest) WithDisplayName(displayName string) *UpdateRequest {
 	return ur
 }
 
-func (ur *UpdateRequest) WithSMSConfiguration(smsConfiguration *RequestSMSConfiguration) *UpdateRequest {
-	ur.SMSConfiguration = smsConfiguration
-	return ur
-}
-
-func (ur *UpdateRequest) WithVoiceConfiguration(voiceConfiguration *RequestVoiceConfiguration) *UpdateRequest {
-	ur.VoiceConfiguration = voiceConfiguration
-	return ur
-}
-
-func (ur *UpdateRequest) WithSMSConfigurationServicePlanID(servicePlanID string) *UpdateRequest {
+func (ur *UpdateRequest) WithSMSConfiguration(servicePlanID string, campaignID string) *UpdateRequest {
 	if ur.SMSConfiguration == nil {
 		ur.SMSConfiguration = new(RequestSMSConfiguration)
 	}
 	ur.SMSConfiguration.ServicePlanID = servicePlanID
-	return ur
-}
-
-func (ur *UpdateRequest) WithSMSConfigurationCampaignID(campaignID string) *UpdateRequest {
-	if ur.SMSConfiguration == nil {
-		ur.SMSConfiguration = new(RequestSMSConfiguration)
-	}
 	ur.SMSConfiguration.CampaignID = campaignID
 	return ur
 }
 
-func (ur *UpdateRequest) WithVoiceConfigurationAppID(appID string) *UpdateRequest {
+func (ur *UpdateRequest) WithVoiceConfiguration(appID string) *UpdateRequest {
 	if ur.VoiceConfiguration == nil {
 		ur.VoiceConfiguration = new(RequestVoiceConfiguration)
 	}
@@ -107,6 +90,11 @@ func (ur *UpdateRequest) Validate() error {
 	if ur.SMSConfiguration != nil {
 		if ur.SMSConfiguration.ServicePlanID == "" {
 			errors = append(errors, ServicePlanIDRequiredError)
+		}
+	}
+	if ur.VoiceConfiguration != nil {
+		if ur.VoiceConfiguration.AppID == "" {
+			errors = append(errors, AppIDRequiredError)
 		}
 	}
 	if len(errors) > 0 {
