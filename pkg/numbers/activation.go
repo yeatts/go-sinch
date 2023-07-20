@@ -58,12 +58,11 @@ func (ar *ActivationRequest) WithPhoneNumber(phoneNumber string) *ActivationRequ
 	return ar
 }
 
-func (ar *ActivationRequest) WithSMSConfiguration(servicePlanID string, campaignID string) *ActivationRequest {
+func (ar *ActivationRequest) WithSMSConfiguration(servicePlanID string) *ActivationRequest {
 	if ar.SMSConfiguration == nil {
 		ar.SMSConfiguration = new(RequestSMSConfiguration)
 	}
 	ar.SMSConfiguration.ServicePlanID = servicePlanID
-	ar.SMSConfiguration.CampaignID = campaignID
 	return ar
 }
 

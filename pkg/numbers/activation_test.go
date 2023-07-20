@@ -34,7 +34,7 @@ func Test_ActivationRequest_Validate(t *testing.T) {
 		},
 		"missing service plan": {
 			configFn: func() {
-				ar = new(ActivationRequest).WithPhoneNumber("1234567890").WithSMSConfiguration("", "")
+				ar = new(ActivationRequest).WithPhoneNumber("1234567890").WithSMSConfiguration("")
 			},
 			expectedErr: ServicePlanIDRequiredError,
 		},
@@ -46,7 +46,7 @@ func Test_ActivationRequest_Validate(t *testing.T) {
 		},
 		"no errors": {
 			configFn: func() {
-				ar = new(ActivationRequest).WithPhoneNumber("1234567890").WithSMSConfiguration("test", "test")
+				ar = new(ActivationRequest).WithPhoneNumber("1234567890").WithSMSConfiguration("test")
 			},
 			expectedErr: nil,
 		},
